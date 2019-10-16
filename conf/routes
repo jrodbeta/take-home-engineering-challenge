@@ -1,2 +1,2 @@
 # Routes
-GET /food-trucks    controllers.FoodTruckController.index(lat: Option[Long], long: Option[Long])
+GET /food-trucks    controllers.FoodTruckController.index(lat: Option[Double], long: Option[Double])

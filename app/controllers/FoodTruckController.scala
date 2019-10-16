@@ -16,7 +16,7 @@ class FoodTruckController @Inject()(cc: ControllerComponents) extends AbstractCo
   /**
    * Returns all Food Trucks or trucks closest to provided latitude and longitude
    */
-  def index(lat: Option[Long], long: Option[Long]) = Action { implicit request: Request[AnyContent] =>
+  def index(lat: Option[Double], long: Option[Double]) = Action { implicit request: Request[AnyContent] =>
     (lat, long) match {
       case (Some(lat), Some(long)) =>
         Ok(serializeFoodTrucks(
