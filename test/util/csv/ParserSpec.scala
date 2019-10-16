@@ -3,7 +3,7 @@ package util.csv
 import org.scalatest.{FunSpec, Matchers}
 
 class ParserSpec extends FunSpec with Matchers {
-  describe("CSVParser") {
+  describe("Parser") {
     describe("parseString") {
       it("parses basic csv payload") {
         val csvPayload =
