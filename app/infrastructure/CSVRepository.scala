@@ -5,6 +5,13 @@ import util.csv.Parser
 
 import scala.util.{Failure, Success, Try}
 
+/**
+ * CSVRepository encapsulates the infrastructure layer of app
+ * orchestrates interaction between our actual file and parsing
+ * the file to return domain entity.
+ * @param fileSource
+ * @param parser
+ */
 class CSVRepository(fileSource: FileSource, parser: Parser) {
   val ExpectedCols = 24
 
@@ -12,11 +19,16 @@ class CSVRepository(fileSource: FileSource, parser: Parser) {
     // Starting at 0 because we're computer scientists
     val Id = 0
     val Applicant = 1
-    val Status = 11
-    val Latitude = 15
-    val Longitude = 16
+    val Status = 10
+    val Latitude = 14
+    val Longitude = 15
   }
 
+  /**
+   * Get food trucks from our repository.
+   * @return Either a Left of an error that occurred during the operation OR
+   *         a right of the food trucks successfully received.
+   */
   def getFoodTrucks(): Either[List[RepositoryError], List[FoodTruck]] = {
     val payload = fileSource.getPayload()
     val rawRecords = parser.parseString(payload, true)
@@ -37,8 +49,8 @@ class CSVRepository(fileSource: FileSource, parser: Parser) {
             applicant = record(ColumnIds.Applicant),
             status = toStatus(record(ColumnIds.Status)),
             Location(
-              latitude = record(ColumnIds.Latitude).toLong,
-              longitude = record(ColumnIds.Longitude).toLong
+              latitude = record(ColumnIds.Latitude).toDouble,
+              longitude = record(ColumnIds.Longitude).toDouble
             )
           )
         } match {

@@ -21,8 +21,8 @@ class CSVRepositorySpec extends FunSpec with Matchers with MockitoSugar {
         val csv = List(
           List[String](
             id.toString, applicant, "", "", "", "",
-            "", "", "", "", "", status,
-            "", "", "", latitude.toString, longitude.toString, "",
+            "", "", "", "", status, "",
+            "", "", latitude.toString, longitude.toString, "", "",
             "", "", "", "", "", ""
           )
         )

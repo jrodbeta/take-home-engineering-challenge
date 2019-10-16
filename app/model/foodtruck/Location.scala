@@ -1,3 +1,3 @@
 package model.foodtruck
 
-case class Location(latitude: Long, longitude: Long)
+case class Location(latitude: Double, longitude: Double)

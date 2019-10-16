@@ -14,11 +14,19 @@ import org.locationtech.spatial4j.shape.Point
 /**
  * In memory geospatial search using an in memory lucene
  * datastore under the hood.
+ *
+ * I'm not super experienced with geospatial searches so a lot
+ * of this is really from lucene's example:
+ * https://github.com/apache/lucene-solr/blob/master/lucene/spatial-extras/src/test/org/apache/lucene/spatial/SpatialExample.java
+ *
  * @param foodTrucks Food trucks to index
  */
 class SearchService(foodTrucks: List[FoodTruck]) {
-  // The detail of the search we want.
-  private val MaxLevels = 10
+  /**
+   * MaxLevels at 11 gives us "sub-meter" precision which seems
+   * suitable for the given problem (Food trucks can be right next to each other)
+   */
+  private val MaxLevels = 11
 
   private val ctx = SpatialContext.GEO
   private val grid = new GeohashPrefixTree(ctx, MaxLevels)
@@ -40,6 +48,11 @@ class SearchService(foodTrucks: List[FoodTruck]) {
     indexWriter.close()
   }
 
+  /**
+   * Create lucene document from domain entity FoodTruck
+   * @param foodTruck
+   * @return Document to put in index
+   */
   private def newDocument(foodTruck: FoodTruck): Document = {
     val doc = new Document
     doc.add(new StoredField("id", foodTruck.id))
