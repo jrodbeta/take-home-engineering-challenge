@@ -11,7 +11,7 @@ trait FileSource {
   def getPayload(): String
 }
 
-class FileSourceImpl extends FileSource {
+class LocalFileSource extends FileSource {
   override def getPayload(): String = {
     Source.fromFile("Mobile_Food_Facility_Permit.csv").toList.mkString
   }
