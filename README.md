@@ -1,37 +1,129 @@
 # Take Home Engineering Challenge
 
-We are a very practical team at Microsoft and this extends to the way that we work with you to find out if this team is a great fit for you. We want you to come away with a great understanding of the work that we actually do day to day and what it is like to work with us.
+## Technical Details
 
-So instead of coding at a whiteboard with someone watching over your shoulder under high pressure, which is not a thing we often do, we instead discuss code that you have written previously when we meet.
+### Language & Build
+This project is a Scala based project using the Play web framework.
+I chose it because it's the language I'm most comfortable with.  Given more
+time I might have chosen something else but I know this'll can be a 
+stateless scalable application.
 
-This can be a project of your own or a substantial pull request on a third party project, but some folks have done largely private or proprietary work, and this engineering challenge is for you.
+Since it's Scala Play, SBT is the build and dependency management tool.
 
-## Guidelines
+### Other Utils
+Two complicated problems which I didn't want to rewrite were
+CSV parsing and geospatial searching.
 
--   This is meant to be an assignment that you spend approximately three hours of dedicated, focused work. Do not feel like you need to overengineer the solution with dozens of hours to impress us. Be biased toward quality over quantity.
+I've used two off the shelve offerings to solve both problems.
 
--   Think of this like an open source project. Create a repo on Github, use git for source control, and use README.md to document what you built for the newcomer to your project.
+For CSV parsing, I chose an Apache Commons util.
 
--   Our team builds, alongside our customers and partners, systems engineered to run in production. Given this, please organize, design, test, deploy, and document your solution as if you were going to put into production. We completely understand this might mean you can't do as much in the time budget. Be biased for production-ready over features.
+For geospatial searching, I chose an in memory lucene index.
 
--   Think out loud in your submission's documentation. Document tradeoffs, the rationale behind your technical choices, or things you would do or do differently if you were able to spend more time on the project or do it again.
+### Project Layout
+This follows the Play project layout.
 
--   Our team meets our customers where they are in terms of software engineering platforms, frameworks, tools, and languages. This means you have wide latitude to make choices that express the best solution to the problem given your knowledge and favorite tools. Make sure to document how to get started with your solution in terms of setup.
+* `app/` Scala source organized by package
+* `test/` Scala tests organized by package
+* `project/` Configuration for the SBT plugin itself
+* `build.sbt` Configuration for the projects build and dependencies
 
-## The Problem
 
-Our San Francisco team loves to eat. They are also a team that loves variety, so they also like to discover new places to eat.
+## Code Architecture
 
-In fact, we have a particular affection for food trucks. One of the great things about Food Trucks in San Francisco is that the city releases a list of them as open data.
+I've used some basic DDD patterns to separate out concerns
+of different components.  
 
-Your assignment is to make it possible for us to find a food truck no matter where our work takes us in the city.
+### Domain
+Collection of simple objects which represent entities and value objects
+represented in the CSV.  Currently they only have the minimum
+which is needed as far as fields for this.
 
-This is a freeform assignment. You can write a web API that returns a set of food trucks (our team is fluent in JSON). You can write a web frontend that visualizes the nearby food trucks. We also spend a lot of time in the shell, so a CLI that gives us a couple of local options would be great. And don't be constrained by these ideas if you have a better one!
+### Infrastructure
+This layer would encapsulate any datasource.  For the time limit
+here I chose to focus on the CSV file provided.
+Interactions with the CSV file and transformation into the 
+domain entity can be found in the `CSVRepository` class.
 
-The only requirement for the assignment is that it give us at least 5 food trucks to choose from a particular latitude and longitude.
+### Service
+There are two services in this project: `FoodTruckService` and `SearchService`
 
-Feel free to tackle this problem in a way that demonstrates your expertise of an area -- or takes you out of your comfort zone. For example, if you build Web APIs by day and want to build a frontend to the problem or a completely different language instead, by all means go for it - learning is a core competency in our group. Let us know this context in your solution's documentation.
+The `SearchService` is an application service that encapsulates 
+the lucene and spatial searching
+functionality.  Given a list of FoodTrucks, it creates the in memory index
+which can be used for searching by other clients.
 
-San Francisco's food truck open dataset is [located here](https://data.sfgov.org/Economy-and-Community/Mobile-Food-Facility-Permit/rqzj-sfat/data) and there is an endpoint with a [CSV dump of the latest data here](https://data.sfgov.org/api/views/rqzj-sfat/rows.csv). We've included a [copy of this data](./Mobile_Food_Facility_Permit.csv) in this repo as well.
+The `FoodTruckService` is a domain service which contains
+business functionality like max results and also composes
+our infrastructure layer and search together.
 
-Good luck! Please send a link to your solution on Github back to us at least 12 hours before your interview so we can review it before we speak.
+## Running this project
+
+### Using SBT
+To run this project, you'll need to have SBT installed.
+
+With sbt you can issue commands in the console or 
+run them directly in the command line.
+
+Example console usage for testing:
+
+```bash
+$ sbt
+[info] Loading global plugins from /Users/jose/.sbt/1.0/plugins
+...
+[take-home-engineering-challenge] $ test
+...
+[success] Total time: 12 s, completed Oct 16, 2019 10:59:23 AM
+[take-home-engineering-challenge] $ 
+```
+
+Example arguement usage for running:
+
+```bash
+$sbt run
+[info] Loading global plugins from /Users/jose/.sbt/1.0/plugins
+...
+[info] p.c.s.AkkaHttpServer - Listening for HTTP on /0:0:0:0:0:0:0:0:9000
+
+(Server started, use Enter to stop and go back to the console...)
+```
+
+### Making Requests
+
+Currently only a JSON API exists for the application.
+Requests can be made using `curl`.
+
+Example request for all trucks using JQ to format:
+
+```bash
+$ curl 'http://localhost:9000/food-trucks' | jq
+```
+
+Example request for searching 5 closest trucks to latitude and longitude
+
+```bash
+$ curl 'http://localhost:9000/food-trucks?lat=37.7101930199757&long=-122.455221906126' | jq
+```
+
+## Improvements I'd make
+
+### Replacing the infrastructure layer
+Instead of a CSV repository we should be feeding directly 
+from the API.
+
+### Replacing the search service
+An in memory index is enough for this exercise and finite dataset
+but for the problem to be scalable it should be pulled out
+into a suitable datastore.
+
+### A UI!
+I would have liked to build a nice react based UI
+
+### More Testing
+
+I would like to add more unit testing to the controller
+Would have been nice to at least cover the JSON serialization.
+
+I'm also a fan of component level testing.  Specifically testing the built artifact
+to make sure everything is composed together correctly.
+
